@@ -45,6 +45,8 @@
         this.template = this.options.template || this.template;
         this.modalBackdrop = this.options.modalBackdrop || this.modalBackdrop;
         this.defaultTime = this.options.defaultTime || this.defaultTime;
+        this.openOnInputFocus = this.options.openOnInputFocus || this.openOnInputFocus;
+        this.openOnInputClick = this.options.openOnInputClick || this.openOnInputClick;
         this.open = false;
         this.init();
     };
@@ -54,32 +56,21 @@
         constructor: Timepicker
 
         , init: function () {
-            if (this.$element.parent().hasClass('input-append')) {
+            if (this.openOnInputFocus)
+                this.$element.on('focus.timepicker', $.proxy(this.showWidget, this));
+            else
+                this.$element.on('focus.timepicker', $.proxy(this.highlightUnit, this));
+
+            if (this.openOnInputClick)
+                this.$element.on('click.timepicker', $.proxy(this.showWidget, this));
+            else
+                this.$element.on('click.timepicker', $.proxy(this.highlightUnit, this));
+
+            this.$element.on('keypress.timepicker', $.proxy(this.elementKeypress, this));
+            this.$element.on('blur.timepicker', $.proxy(this.blurElement, this));
+
+            if (this.$element.parent().hasClass('input-append'))
                 this.$element.parent('.input-append').find('.add-on').on('click.timepicker', $.proxy(this.showWidget, this));
-                this.$element.on({
-                    'focus.timepicker': $.proxy(this.highlightUnit, this),
-                    'click.timepicker': $.proxy(this.highlightUnit, this),
-                    'keypress.timepicker': $.proxy(this.elementKeypress, this),
-                    'blur.timepicker': $.proxy(this.blurElement, this)
-                });
-
-            } else {
-                if (this.template) {
-                    this.$element.on({
-                        'focus.timepicker': $.proxy(this.showWidget, this),
-                        'click.timepicker': $.proxy(this.showWidget, this),
-                        'blur.timepicker': $.proxy(this.blurElement, this)
-                    });
-                } else {
-                    this.$element.on({
-                        'focus.timepicker': $.proxy(this.highlightUnit, this),
-                        'click.timepicker': $.proxy(this.highlightUnit, this),
-                        'keypress.timepicker': $.proxy(this.elementKeypress, this),
-                        'blur.timepicker': $.proxy(this.blurElement, this)
-                    });
-                }
-            }
-
 
             this.$widget = $(this.getTemplate()).appendTo('body');
 
@@ -806,6 +797,8 @@
     , template: 'dropdown'
     , modalBackdrop: false
     , templates: {} // set custom templates
+    , openOnInputFocus: true
+    , openOnInputClick: true
     }
 
     $.fn.timepicker.Constructor = Timepicker
